@@ -1,4 +1,4 @@
-# 1. ShiroAi-chan and her friend Kiki-chan
+# 1. ShiroAi-chan comfy on Streamlit
 ![Screenshot](pictures/shiro_black_github.png)
 ![Screenshot](pictures/kiki_chan.png)
 
