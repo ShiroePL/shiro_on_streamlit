@@ -129,7 +129,7 @@ if button1: # this is like my voice_control function in shiro tkinter
         # print_response_label("I added event with this info: \n" + formatted_query_to_calendar)
         answer_area.text_area('Answer', "I added event with this info: \n" + formatted_query_to_calendar)
 
-        connect_to_phpmyadmin.insert_message_to_database(name, question, answer, messages) #insert to Azure DB to user table    
+        connect_to_phpmyadmin.insert_message_to_database(name, query, answer, messages) #insert to Azure DB to user table    
         connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
         connect_to_phpmyadmin.send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_tokens) #to A DB with usage stats
         
@@ -146,7 +146,7 @@ if button1: # this is like my voice_control function in shiro tkinter
         my_bar.progress(60, text="got answer")
         answer_area.text_area('Answer', answer)
         
-        connect_to_phpmyadmin.insert_message_to_database(name, question, answer, messages) #insert to Azure DB to user table    
+        connect_to_phpmyadmin.insert_message_to_database(name, query, answer, messages) #insert to Azure DB to user table    
         connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
 
 
@@ -208,8 +208,10 @@ if button1: # this is like my voice_control function in shiro tkinter
 progress_label.text('Done!')
 my_bar.progress(100, text="Done!")
 print("-------end of code---------")
-
-
+clean_history_button = st.button('clean history')
+if clean_history_button:
+    connect_to_phpmyadmin.reset_chat_history(name)
+    progress_label.text('History cleaned!')
 
 
 
