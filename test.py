@@ -173,7 +173,7 @@ with st.sidebar:
         if agent_mode:
             agent_mode_variable = True
             st.write('Agent mode on!')                               
-    image = Image.open('pictures/avatar1.png')
+    image = Image.open('pictures/avatar_shiro.png')
     st.image(image)
 
 # Store the initial value of widgets in session state
