@@ -1,6 +1,6 @@
 # 1. ShiroAi-chan comfy on Streamlit
-![Screenshot](pictures/shiro_black_github.png)
-![Screenshot](pictures/kiki_chan.png)
+![Screenshot](pictures/avatar_shiro.png)
+
 
 
 ### My attempt to create my anime waifu assistant that can write and speak in cute voice.
