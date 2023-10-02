@@ -1,3 +1,4 @@
+from datetime import datetime
 import streamlit as st
 from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
@@ -14,17 +15,91 @@ from better_profanity import profanity
 import string
 from langchain_database.answer_with_chromadb_huggingface_embedd import search_chroma_db
 from langchain_database.test_wszystkiego import add_event_from_shiro
-
+import base64
+import pandas as pd
 # Add a selectbox to the sidebar:
 import connect_to_phpmyadmin
-
+import request_voice_tts
 import chatgpt_api
+from st_custom_components import st_audiorec
+import os
+from PIL import Image
+import numpy as np
+from audiorecorder import audiorecorder
+from io import BytesIO
+import streamlit.components.v1 as components
+from audio_recorder_streamlit import audio_recorder
+import anilist.anilist_api_requests as anilist_api_requests
+from shiro_agent import CustomToolsAgent
+from home_assistant import ha_api_requests
+#conn= st.experimental_connection('mysql', type='sql')
 
+conn = None
+tts_or_not = False
+show_history_variable = False
 name = "normal"
-progress_label = st.empty()
-progress_label.text('Log...')
 agent_reply = ""
+agent_mode_variable = False
 
+col11, col22 = st.columns(2)
+with col11:
+    progress_label = st.empty()
+    progress_label.text('Log...')
+with col22:
+    show_history = st.checkbox('Show history')
+
+    if show_history:
+        show_history_variable = True
+        
+        
+
+
+def agent_shiro(query):
+    agent = CustomToolsAgent()
+    final_answer = agent.run(query)
+    return final_answer
+
+def autoplay_audio(file_path: str):
+    with open(file_path, "rb") as f:
+        data = f.read()
+        b64 = base64.b64encode(data).decode()
+        md = f"""
+            <audio autoplay="true">
+            <source src="data:audio/wav;base64,{b64}" type="audio/wav">
+            </audio>
+            """
+        st.markdown(
+            md,
+            unsafe_allow_html=True,
+        )
+
+def autoplay_question(file_path: str):
+    autoplay_audio(file_path)
+@st.cache_data
+def autoplay_beep(file_path: str):
+    with open(file_path, "rb") as f:
+        data = f.read()
+        b64 = base64.b64encode(data).decode()
+        md = f"""
+            <audio autoplay="true">
+            <source src="data:audio/wav;base64,{b64}" type="audio/wav">
+            </audio>
+            """
+        st.markdown(
+            md,
+            unsafe_allow_html=True,
+        )
+
+
+def retrieve_chat_history_from_database():
+    history = connect_to_phpmyadmin.retrieve_chat_history_from_database("normal")
+    return history
+
+def show_history_in_table():
+    #show_history_variable = True
+    if show_history_variable == True:
+        df = pd.DataFrame(connect_to_phpmyadmin.retrieve_chat_history_from_database("normal"))
+        st.dataframe(df)
 
 #@st.cache_data
 def chech_user_in_database(name):
@@ -75,16 +150,29 @@ def search_chroma_db(query):
     return answer_from_database
 
 
-def testujemy(text_input):
-    st.write("You entered: ", text_input)
-    #print("to sie pokazalo")
-    return "cos"
+
     
 
 add_selectbox = st.sidebar.selectbox(
     'How would you like to be contacted?',
     ('tets', 'fsdf', 'Mobile phone')
 )
+
+with st.sidebar:
+    coll1, coll2 = st.columns(2)
+    with coll1:
+        voice_on_off = st.checkbox('Voice on/off')
+        if voice_on_off:
+            tts_or_not = True
+            st.write('Great!!')
+    with coll2:
+        #pass
+        agent_mode = st.checkbox('agent_mode on/off')
+        if agent_mode:
+            agent_mode_variable = True
+            st.write('Agent mode on!')                               
+    image = Image.open('pictures/avatar1.png')
+    st.image(image)
 
 # Store the initial value of widgets in session state
 if "visibility" not in st.session_state:
@@ -114,10 +202,22 @@ question = question.translate(str.maketrans("", "", punctuation_without_colon)).
 
 if button1: # this is like my voice_control function in shiro tkinter
     messages =  chech_user_in_database(name)
-    if question == "costam":
-        pass
+    
+    
+    if question.lower().startswith("agent:") or agent_mode_variable == True or question.lower().startswith("agent mode"):
+            print("---------agent mode ENTERED---------")
+            my_bar.progress(10, text="agent checking question...")
+            question = question.replace("agent:", "").strip()
+            question = question.replace("agent mode", "").strip()
 
-    elif question.lower().startswith("plan:") or "add_event_to_calendar" in agent_reply:
+            agent_reply = agent_shiro(question)
+            my_bar.progress(20, text="agent replied: " + agent_reply)
+            
+            print("Agent: " + agent_reply)
+            print("----------agent mode EXIT-----------")
+
+
+    if question.lower().startswith("plan:") or "add_event_to_calendar" in agent_reply:
         query = question.replace("plan:", "").strip()
 
         messages.append({"role": "user", "content": query})
@@ -138,7 +238,7 @@ if button1: # this is like my voice_control function in shiro tkinter
         # running = False
         # progress(100,"showed, done")    
         
-    elif question.lower().startswith("db:") or "database_search" in agent_reply:
+    elif question.lower().startswith("db:") or "database_search" in agent_reply or "personal_db_search" in agent_reply:
         query = question.replace("db:", "").strip()
         messages.append({"role": "user", "content": query})
         answer = search_chroma_db(query)
@@ -148,7 +248,44 @@ if button1: # this is like my voice_control function in shiro tkinter
         
         connect_to_phpmyadmin.insert_message_to_database(name, query, answer, messages) #insert to Azure DB to user table    
         connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
+        if tts_or_not == True:
+            request_voice_tts.request_voice_fn(answer) #request Azure TTS to for answer
+            autoplay_question("response.wav") #play audio with answer
+            autoplay_beep("cute_beep.wav") # end of answer beep
+        show_history_in_table()    
 
+    elif question.lower().startswith("ha:") or "home_assistant" in agent_reply:
+        query = question.replace("ha:", "").strip()
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S %A")
+        query = f"[current time: {current_time}] {query}"
+        # use function chain to add event to calendar
+        answer_from_ha = ha_api_requests.room_temp()
+        print("answer from api: " + answer_from_ha)
+
+        
+        query2 = f"[current time: {current_time}] Madrus: {query}. shiro: Retriving informations from her sensors... Done! Info from sensors:{answer_from_ha}°C. Weather outside: 25°C.| (please say °C in your answer) | Shiro:"
+        messages.append({"role": "user", "content": query2})
+                
+        print("messages: " + str(messages))
+        #logger.info("messages: " + str(messages))
+        personalized_answer, prompt_tokens, completion_tokens, total_tokens = chatgpt_api.send_to_openai(messages)
+
+        print("answer: " + personalized_answer)
+        #logger.info("answer: " + personalized_answer)
+        
+        my_bar.progress(60, text="got answer")
+        answer_area.text_area('Answer', personalized_answer)
+
+        connect_to_phpmyadmin.insert_message_to_database(name, question, personalized_answer, messages) #insert to Azure DB to user table    
+        connect_to_phpmyadmin.add_pair_to_general_table(name, personalized_answer) #to general table with all  questions and answers
+        connect_to_phpmyadmin.send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_tokens) #to A DB with usage stats
+        print("-----addded tokens to db--------")
+        #logger.info("-----addded tokens to db--------")
+        if tts_or_not == True:
+            request_voice_tts.request_voice_fn(personalized_answer) #request Azure TTS to for answer
+            autoplay_question("response.wav") #play audio with answer
+            autoplay_beep("cute_beep.wav") # end of answer beep      
+        show_history_in_table() 
 
     else:
         question = f"Madrus: {question}"
@@ -182,28 +319,42 @@ if button1: # this is like my voice_control function in shiro tkinter
         connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
         connect_to_phpmyadmin.send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_tokens) #to A DB with usage stats
         my_bar.progress(80, text="saved to DB")
+        if tts_or_not == True:
+            request_voice_tts.request_voice_fn(answer) #request Azure TTS to for answer
+            autoplay_question("response.wav") #play audio with answer
+            autoplay_beep("cute_beep.wav") # end of answer beep
+        show_history_in_table() 
         print("---------------------------------")
 
-        # beep = "cute_beep" #END OF ANSWER
-        # play_audio_fn(beep)
-
-        #     #show history in text widget
-        # progress(90,"showing in text box...")
-        # #show_history_from_db_widget.delete('1.0', 'end')
-        # display_messages_from_database_only(take_history_from_database())
-        
-        # running = False
-        # progress(100,"saved to DB, done")
+       
 
 
 
 
 
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    anime_button = st.button("show anime history")
+
+with col2:
+    manga_button = st.button("show manga history")
+
+with col3:
+    history_in_db_button = st.button("show history of chatting")
 
 
+if anime_button:
+    # media_list,_ = anilist_api_requests.get_10_newest_entries("ANIME")
+    # answer_area.text_area('Answer', media_list)
+    show_history_variable = True
+    show_history_in_table() 
+    show_history_variable = False
 
 
-
+if history_in_db_button:
+    history = chech_user_in_database(name)
+    answer_area.text_area('Answer', history)
 
 progress_label.text('Done!')
 my_bar.progress(100, text="Done!")
@@ -211,14 +362,31 @@ print("-------end of code---------")
 clean_history_button = st.button('clean history')
 if clean_history_button:
     connect_to_phpmyadmin.reset_chat_history(name)
+    connect_to_phpmyadmin.check_user_in_database(name)
     progress_label.text('History cleaned!')
+    autoplay_beep("cute_beep.wav")
 
+# wav_audio_data = st_audiorec()
 
+# if wav_audio_data is not None:
+#     # display audio data as received on the backend
+#     st.audio(wav_audio_data, format='audio/wav')
 
+# st.title("Audio Recorder")
+# audio = audiorecorder("Click to record", "Recording...")
 
+# if len(audio) > 0:
+#     # To play audio in frontend:
+#     st.audio(audio.tobytes())
+    
+#     # To save audio to a file:
+#     wav_file = open("audio.mp3", "wb")
+#     wav_file.write(audio.tobytes())
 
-
-
+# Use pandas DataFrame to structure your data
+# if show_history_variable == True:
+#         df = pd.DataFrame(connect_to_phpmyadmin.retrieve_chat_history_from_database("normal"))
+#         st.dataframe(df)
 
  # BUTTON TO iniciate the process with question from input
     
