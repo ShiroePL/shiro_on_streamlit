@@ -50,9 +50,8 @@ with col22:
 
     if show_history:
         show_history_variable = True
-        
-        
 
+    
 
 def agent_shiro(query):
     agent = CustomToolsAgent()
@@ -107,6 +106,9 @@ def chech_user_in_database(name):
     history = connect_to_phpmyadmin.retrieve_chat_history_from_database(name)
     return history
 
+
+
+
 @st.cache_data
 def search_chroma_db(query):
     instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-large", 
@@ -153,9 +155,9 @@ def search_chroma_db(query):
 
     
 
-add_selectbox = st.sidebar.selectbox(
-    'How would you like to be contacted?',
-    ('tets', 'fsdf', 'Mobile phone')
+selected_language = st.sidebar.selectbox(
+    'What language should i speak?',
+    ('English', 'Polish')
 )
 
 with st.sidebar:
@@ -184,7 +186,7 @@ question = st.text_input( # INPUT FOR QUESTION
     label_visibility=st.session_state.visibility,
 )
 
-st.write('Debug: Current value of text_input is: ', question)
+st.write('Debug: Current value of selected_language is: ', selected_language)
 
     
 my_bar = st.progress(0) #progress bar
@@ -249,7 +251,10 @@ if button1: # this is like my voice_control function in shiro tkinter
         connect_to_phpmyadmin.insert_message_to_database(name, query, answer, messages) #insert to Azure DB to user table    
         connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
         if tts_or_not == True:
-            request_voice_tts.request_voice_fn(answer) #request Azure TTS to for answer
+            if selected_language == 'Polish':
+                request_voice_tts.request_voice_fn(answer, True) #request Azure TTS to for answer
+            else:
+                request_voice_tts.request_voice_fn(answer)
             autoplay_question("response.wav") #play audio with answer
             autoplay_beep("cute_beep.wav") # end of answer beep
         show_history_in_table()    
@@ -282,9 +287,12 @@ if button1: # this is like my voice_control function in shiro tkinter
         print("-----addded tokens to db--------")
         #logger.info("-----addded tokens to db--------")
         if tts_or_not == True:
-            request_voice_tts.request_voice_fn(personalized_answer) #request Azure TTS to for answer
+            if selected_language == 'Polish':
+                request_voice_tts.request_voice_fn("temperatura podana kończę na dziś", True) #request Azure TTS to for answer
+            else:
+                request_voice_tts.request_voice_fn(personalized_answer)
             autoplay_question("response.wav") #play audio with answer
-            autoplay_beep("cute_beep.wav") # end of answer beep      
+            autoplay_beep("cute_beep.wav") # end of answer beep    
         show_history_in_table() 
 
     else:
@@ -343,23 +351,75 @@ with col2:
 with col3:
     history_in_db_button = st.button("show history of chatting")
 
+col4, col5, col6 = st.columns(3)
+
+with col4:
+    clean_history_button = st.button('clean history')
+
+with col5:
+    show_room_temp_button = st.button('show room temp')
 
 if anime_button:
-    # media_list,_ = anilist_api_requests.get_10_newest_entries("ANIME")
-    # answer_area.text_area('Answer', media_list)
+    media_list,_ = anilist_api_requests.get_10_newest_entries("ANIME")
+    answer_area.text_area('Answer', media_list)
+    show_history_variable = True
+    show_history_in_table() 
+    show_history_variable = False
+
+if manga_button:
+    media_list,_ = anilist_api_requests.get_10_newest_entries("MANGA")
+    answer_area.text_area('Answer', media_list)
+    show_history_variable = True
+    show_history_in_table() 
+    show_history_variable = False
+
+if history_in_db_button:
+    history = chech_user_in_database(name)
     show_history_variable = True
     show_history_in_table() 
     show_history_variable = False
 
 
-if history_in_db_button:
-    history = chech_user_in_database(name)
-    answer_area.text_area('Answer', history)
+if show_room_temp_button:
+    messages =  chech_user_in_database(name)
+    query = "what temperature is in my room?"
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S %A")
+    query = f"[current time: {current_time}] {query}"
+    # use function chain to add event to calendar
+    answer_from_ha = ha_api_requests.room_temp()
+    print("answer from api: " + answer_from_ha)
+
+    
+    query2 = f"[current time: {current_time}] Madrus: {query}. shiro: Retriving informations from her sensors... Done! Info from sensors:{answer_from_ha}°C. Weather outside: 25°C.| (please say °C in your answer) | Shiro:"
+    messages.append({"role": "user", "content": query2})
+            
+    print("messages: " + str(messages))
+    #logger.info("messages: " + str(messages))
+    personalized_answer, prompt_tokens, completion_tokens, total_tokens = chatgpt_api.send_to_openai(messages)
+
+    print("answer: " + personalized_answer)
+    #logger.info("answer: " + personalized_answer)
+    
+    my_bar.progress(60, text="got answer")
+    answer_area.text_area('Answer', personalized_answer)
+
+    connect_to_phpmyadmin.insert_message_to_database(name, query, personalized_answer, messages) #insert to Azure DB to user table    
+    connect_to_phpmyadmin.add_pair_to_general_table(name, personalized_answer) #to general table with all  questions and answers
+    connect_to_phpmyadmin.send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_tokens) #to A DB with usage stats
+    print("-----addded tokens to db--------")
+    #logger.info("-----addded tokens to db--------")
+    if tts_or_not == True:
+        if selected_language == 'Polish':
+            request_voice_tts.request_voice_fn("temperatura podana kończę na dziś", True) #request Azure TTS to for answer
+        else:
+            request_voice_tts.request_voice_fn(personalized_answer)
+        autoplay_question("response.wav") #play audio with answer
+        autoplay_beep("cute_beep.wav") # end of answer beep    
 
 progress_label.text('Done!')
 my_bar.progress(100, text="Done!")
 print("-------end of code---------")
-clean_history_button = st.button('clean history')
+
 if clean_history_button:
     connect_to_phpmyadmin.reset_chat_history(name)
     connect_to_phpmyadmin.check_user_in_database(name)
