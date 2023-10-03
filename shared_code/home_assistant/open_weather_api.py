@@ -1,6 +1,6 @@
 import requests
 import json
-from home_assistant.api_keys import weather_api
+from api_keys import weather_api
 #D:\111111.PROGRAMOWANIE\AI W PYTHONIE\shiro_on_streamlit
 def current_temperature():
    
