@@ -240,7 +240,41 @@ if button1: # this is like my voice_control function in shiro tkinter
         my_bar.progress(100, text="done")
         # running = False
         # progress(100,"showed, done")    
+    
+    elif question.lower().startswith("schedule:") or "retrieve_event_from_calendar" in agent_reply:
+        query = question.replace("schedule:", "").strip()
+        query = "Madrus: " + query
+        messages.append({"role": "user", "content": query})
+
+        # use function chain to add event to calendar
+        answer, prompt_tokens, completion_tokens, total_tokens = retrieve_plans_for_days(query)
+
+            # sending schedule to shiro to add personality to raw schedule
+        question = f"""can you summarize my plans ? what i have for that days. tell me like assistant tells plans for her boss when he has little time to listen. In 'your words', not just plain date's. and please order it by dates. here are my plans: '{answer}"""
         
+        messages.append({"role": "user", "content": question})
+                
+        print("messages: " + str(messages))
+        logger.info("messages: " + str(messages))
+        personalized_answer, prompt_tokens2, completion_tokens2, total_tokens2 = chatgpt_api.send_to_openai(messages)
+
+        prompt_tokens += prompt_tokens2
+        completion_tokens += completion_tokens2
+        total_tokens += total_tokens2
+
+        
+        print("answer: " + answer)
+        logger.info("answer: " + answer)
+        tts_answer = "these are your plans:"
+        request_voice.request_voice_fn(tts_answer)
+        connect_to_phpmyadmin.insert_message_to_database(name, question, answer, messages) #insert to Azure DB to user table    
+        connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
+        connect_to_phpmyadmin.send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_tokens) #to A DB with usage stats
+        print("-----addded tokens to db--------")
+        logger.info("-----addded tokens to db--------")
+        return personalized_answer
+
+
     elif question.lower().startswith("db:") or "database_search" in agent_reply or "personal_db_search" in agent_reply:
         query = question.replace("db:", "").strip()
         messages.append({"role": "user", "content": query})
