@@ -18,9 +18,9 @@ from shared_code.calendar_functions.test_wszystkiego import add_event_from_shiro
 import base64
 import pandas as pd
 # Add a selectbox to the sidebar:
-import connect_to_phpmyadmin
+import shared_code.connect_to_phpmyadmin as connect_to_phpmyadmin
 import request_voice_tts
-import chatgpt_api
+import shared_code.chatgpt_api
 from st_custom_components import st_audiorec
 import os
 from PIL import Image
@@ -257,7 +257,7 @@ if button1: # this is like my voice_control function in shiro tkinter
                 
         print("messages: " + str(messages))
         #logger.info("messages: " + str(messages))
-        personalized_answer, prompt_tokens2, completion_tokens2, total_tokens2 = chatgpt_api.send_to_openai(messages)
+        personalized_answer, prompt_tokens2, completion_tokens2, total_tokens2 = shared_code.chatgpt_api.send_to_openai(messages)
 
         prompt_tokens += prompt_tokens2
         completion_tokens += completion_tokens2
@@ -320,7 +320,7 @@ if button1: # this is like my voice_control function in shiro tkinter
                 
         print("messages: " + str(messages))
         #logger.info("messages: " + str(messages))
-        personalized_answer, prompt_tokens, completion_tokens, total_tokens = chatgpt_api.send_to_openai(messages)
+        personalized_answer, prompt_tokens, completion_tokens, total_tokens = shared_code.chatgpt_api.send_to_openai(messages)
 
         print("answer: " + personalized_answer)
         #logger.info("answer: " + personalized_answer)
@@ -355,7 +355,7 @@ if button1: # this is like my voice_control function in shiro tkinter
             # send to open ai for answer
         # progress(40,"sending to openAI...") 
         print("messages: " + str(messages))
-        answer, prompt_tokens, completion_tokens, total_tokens = chatgpt_api.send_to_openai(messages) 
+        answer, prompt_tokens, completion_tokens, total_tokens = shared_code.chatgpt_api.send_to_openai(messages) 
         #txt = st.text_area('Answer', answer)
         answer_area.text_area('Answer', answer)
         my_bar.progress(60, text="got answerr")
@@ -443,7 +443,7 @@ if show_room_temp_button:
             
     print("messages: " + str(messages))
     #logger.info("messages: " + str(messages))
-    personalized_answer, prompt_tokens, completion_tokens, total_tokens = chatgpt_api.send_to_openai(messages)
+    personalized_answer, prompt_tokens, completion_tokens, total_tokens = shared_code.chatgpt_api.send_to_openai(messages)
 
     print("answer: " + personalized_answer)
     #logger.info("answer: " + personalized_answer)
