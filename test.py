@@ -13,7 +13,7 @@ from InstructorEmbedding import INSTRUCTOR
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from better_profanity import profanity
 import string
-from langchain_database.answer_with_chromadb_huggingface_embedd import search_chroma_db
+from shared_code.langchain_database.answer_with_chromadb_huggingface_embedd import search_chroma_db
 from shared_code.calendar_functions.test_wszystkiego import add_event_from_shiro, retrieve_plans_for_days
 import base64
 import pandas as pd
@@ -28,13 +28,10 @@ import numpy as np
 from audiorecorder import audiorecorder
 from io import BytesIO
 import streamlit.components.v1 as components
-from audio_recorder_streamlit import audio_recorder
 import shared_code.anilist.anilist_api_requests as anilist_api_requests
 from shared_code.shiro_agent import CustomToolsAgent
 
 from shared_code.home_assistant import ha_api_requests, open_weather_api
-
-#conn= st.experimental_connection('mysql', type='sql')
 
 conn = None
 tts_or_not = False
