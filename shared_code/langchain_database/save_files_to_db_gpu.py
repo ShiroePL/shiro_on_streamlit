@@ -7,11 +7,12 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.document_loaders import DirectoryLoader
 from InstructorEmbedding import INSTRUCTOR
 from langchain.embeddings import HuggingFaceInstructEmbeddings
-from .. import api_keys
+#from .. import api_keys
+import api_keys
 path_to_langchain = api_keys.path_to_langchain
 # Load and process the text files
 #loader = PyPDFLoader('mydata/book1.pdf')
-loader = PyPDFLoader(path_to_langchain  + 'mydata\\misaki.pdf')
+loader = PyPDFLoader(path_to_langchain  + 'misaki.pdf')
 #loader = DirectoryLoader('mydata', glob="./*.pdf", loader_cls=PyPDFLoader)
 
 documents = loader.load()
@@ -39,7 +40,7 @@ instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instruc
 
 # Embed and store the texts
 # Supplying a persist_directory will store the embeddings on disk
-persist_directory = 'db_testetstets'
+persist_directory = 'shared_code/langchain_database/db_testetstets'
 
 ## Here is the nmew embeddings being used
 embedding = instructor_embeddings

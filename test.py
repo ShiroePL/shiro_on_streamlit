@@ -17,15 +17,11 @@ from shared_code.langchain_database.answer_with_chromadb_huggingface_embedd impo
 from shared_code.calendar_functions.test_wszystkiego import add_event_from_shiro, retrieve_plans_for_days
 import base64
 import pandas as pd
-# Add a selectbox to the sidebar:
 import shared_code.connect_to_phpmyadmin as connect_to_phpmyadmin
 import request_voice_tts
 import shared_code.chatgpt_api
-from st_custom_components import st_audiorec
-import os
 from PIL import Image
 import numpy as np
-from audiorecorder import audiorecorder
 from io import BytesIO
 import streamlit.components.v1 as components
 import shared_code.anilist.anilist_api_requests as anilist_api_requests
@@ -109,10 +105,10 @@ def chech_user_in_database(name):
 
 
 @st.cache_data
-def search_chroma_db(query):
+def search_chroma_dbdafaf(query):
     instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-large", 
                                                         model_kwargs={"device": "cpu"})
-    persist_directory = './langchain_database/db_streamlit'
+    persist_directory = './shared_code/langchain_database/db_streamlit'
     embedding = instructor_embeddings
 
     vectordb2 = Chroma(persist_directory=persist_directory, 
@@ -120,7 +116,7 @@ def search_chroma_db(query):
                     collection_name="personal"
                     )
 
-    retriever = vectordb2.as_retriever(search_kwargs={"k": 4})
+    retriever = vectordb2.as_retriever(search_kwargs={"k": 1})
     
     # Set up the turbo LLM
     turbo_llm = ChatOpenAI(
@@ -137,11 +133,11 @@ def search_chroma_db(query):
 
     ## Cite sources
     def process_llm_response(llm_response):
-        #print(llm_response['result'])
-        #print('full llm response:' + str(llm_response))
-        #print('\n\nSources:')
-        # for source in llm_response["source_documents"]:
-        #     print(source.metadata['source'])
+        print(llm_response['result'])
+        print('full llm response:' + str(llm_response))
+        print('\n\nSources:')
+        for source in llm_response["source_documents"]:
+            print(source.metadata['source'])
         
         return llm_response['result']    
     llm_response = qa_chain(query)
@@ -402,6 +398,9 @@ with col4:
 
 with col5:
     show_room_temp_button = st.button('show room temp')
+
+with col6:
+    add_to_personal_db = st.button('add to personal database')
 
 if anime_button:
     media_list,_ = anilist_api_requests.get_10_newest_entries("ANIME")

@@ -16,9 +16,11 @@
 *.dat
 *password*
 *.httr-oauth*
+
 #api klucze
 **/api_keys.py
 **/private_variables.py
+
 recording.wav
 # Private Node Modules
 node_modules/
@@ -35,13 +37,17 @@ sonar-project.properties
 *.tsv.gz
 *.xlsx
 .scannerwork
-
+misaki.pdf
 langchain_database/db_na_large_viola1
 langchain_database/mydata
 
 # Mac/OSX
 .DS_Store
 
+#chromedb files
+*.pkl
+*.bin
+*.parquet
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -183,3 +189,4 @@ dmypy.json
 cython_debug/
 
 test_agent.py
+langchain_database/db_shiro/chroma-collections.parquet

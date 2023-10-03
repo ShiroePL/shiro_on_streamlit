@@ -40,7 +40,7 @@ instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instruc
 
 # Embed and store the texts
 # Supplying a persist_directory will store the embeddings on disk
-persist_directory = './langchain_database/db_shiro'
+persist_directory = './langchain_database/db_testetstets'
 
 ## Here is the nmew embeddings being used
 embedding = instructor_embeddings

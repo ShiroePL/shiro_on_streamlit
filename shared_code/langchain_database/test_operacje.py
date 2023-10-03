@@ -6,7 +6,7 @@ from langchain.embeddings import HuggingFaceInstructEmbeddings
 def search_personal_chroma_db(query):
     instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-large", 
                                                         model_kwargs={"device": "cpu"})
-    persist_directory = './langchain_database/db_shiro'
+    persist_directory = './langchain_database/db_testetstets'
     embedding = instructor_embeddings
 
     vectordb2 = Chroma(persist_directory=persist_directory, 
@@ -29,4 +29,7 @@ def search_personal_chroma_db(query):
 # print(answer)
 
 if __name__ == "__main__":
+    
+    answer = search_personal_chroma_db("where i gone today?")
+    print(answer)
     pass

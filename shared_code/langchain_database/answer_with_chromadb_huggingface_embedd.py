@@ -14,15 +14,15 @@ from langchain.embeddings import HuggingFaceInstructEmbeddings
 def search_chroma_db(query):
     instructor_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-large", 
                                                         model_kwargs={"device": "cpu"})
-    persist_directory = './langchain_database/db_shiro'
+    persist_directory = 'shiro_on_streamlit/shared_code/langchain_database/db_testetstets'
     embedding = instructor_embeddings
 
     vectordb2 = Chroma(persist_directory=persist_directory, 
                     embedding_function=embedding,
-                    collection_name="personal"
+                    collection_name="misaki"
                     )
 
-    retriever = vectordb2.as_retriever(search_kwargs={"k": 4})
+    retriever = vectordb2.as_retriever(search_kwargs={"k": 1})
     
     # Set up the turbo LLM
     turbo_llm = ChatOpenAI(
@@ -51,9 +51,10 @@ def search_chroma_db(query):
     #print(answer_from_database)
     return answer_from_database
 
-# answer = search_chroma_db("what plants i like?")
 
-# print(answer)
 
 if __name__ == "__main__":
+    # answer = search_chroma_db("of what misaka is fond of?")
+
+    # print(answer)
     pass
