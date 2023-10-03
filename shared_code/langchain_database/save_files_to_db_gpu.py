@@ -7,8 +7,8 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.document_loaders import DirectoryLoader
 from InstructorEmbedding import INSTRUCTOR
 from langchain.embeddings import HuggingFaceInstructEmbeddings
-from private_variables import path_to_langchain
-
+from .. import api_keys
+path_to_langchain = api_keys.path_to_langchain
 # Load and process the text files
 #loader = PyPDFLoader('mydata/book1.pdf')
 loader = PyPDFLoader(path_to_langchain  + 'mydata\\misaki.pdf')
