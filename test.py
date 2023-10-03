@@ -31,7 +31,7 @@ import streamlit.components.v1 as components
 from audio_recorder_streamlit import audio_recorder
 import shared_code.anilist.anilist_api_requests as anilist_api_requests
 from shiro_agent import CustomToolsAgent
-from home_assistant import ha_api_requests, open_weather_api
+from shared_code.home_assistant import ha_api_requests, open_weather_api
 
 #conn= st.experimental_connection('mysql', type='sql')
 
