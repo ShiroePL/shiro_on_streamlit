@@ -14,7 +14,7 @@ from langchain.embeddings import HuggingFaceInstructEmbeddings
 from better_profanity import profanity
 import string
 from langchain_database.answer_with_chromadb_huggingface_embedd import search_chroma_db
-from langchain_database.test_wszystkiego import add_event_from_shiro
+from shared_code.calendar_functions.test_wszystkiego import add_event_from_shiro, retrieve_plans_for_days
 import base64
 import pandas as pd
 # Add a selectbox to the sidebar:
@@ -255,7 +255,7 @@ if button1: # this is like my voice_control function in shiro tkinter
         messages.append({"role": "user", "content": question})
                 
         print("messages: " + str(messages))
-        logger.info("messages: " + str(messages))
+        #logger.info("messages: " + str(messages))
         personalized_answer, prompt_tokens2, completion_tokens2, total_tokens2 = chatgpt_api.send_to_openai(messages)
 
         prompt_tokens += prompt_tokens2
@@ -264,15 +264,26 @@ if button1: # this is like my voice_control function in shiro tkinter
 
         
         print("answer: " + answer)
-        logger.info("answer: " + answer)
+        my_bar.progress(60, text="got answer")
+        answer_area.text_area('Answer', personalized_answer)
+        #logger.info("answer: " + answer)
+
         tts_answer = "these are your plans:"
-        request_voice.request_voice_fn(tts_answer)
+        if tts_or_not == True:
+            if selected_language == 'Polish':
+                request_voice_tts.request_voice_fn("To twoje plan:", True) #request Azure TTS to for answer
+            else:
+                request_voice_tts.request_voice_fn(tts_answer)
+            autoplay_question("response.wav") #play audio with answer
+            autoplay_beep("cute_beep.wav") # end of answer beep    
+
+
         connect_to_phpmyadmin.insert_message_to_database(name, question, answer, messages) #insert to Azure DB to user table    
         connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
         connect_to_phpmyadmin.send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_tokens) #to A DB with usage stats
         print("-----addded tokens to db--------")
-        logger.info("-----addded tokens to db--------")
-        return personalized_answer
+        #logger.info("-----addded tokens to db--------")
+        show_history_in_table() 
 
 
     elif question.lower().startswith("db:") or "database_search" in agent_reply or "personal_db_search" in agent_reply:
