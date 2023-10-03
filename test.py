@@ -31,7 +31,8 @@ import streamlit.components.v1 as components
 from audio_recorder_streamlit import audio_recorder
 import anilist.anilist_api_requests as anilist_api_requests
 from shiro_agent import CustomToolsAgent
-from home_assistant import ha_api_requests
+from home_assistant import ha_api_requests, open_weather_api
+
 #conn= st.experimental_connection('mysql', type='sql')
 
 conn = None
@@ -388,9 +389,10 @@ if show_room_temp_button:
     # use function chain to add event to calendar
     answer_from_ha = ha_api_requests.room_temp()
     print("answer from api: " + answer_from_ha)
+    outside_temp =open_weather_api.current_temperature()
 
     
-    query2 = f"[current time: {current_time}] Madrus: {query}. shiro: Retriving informations from her sensors... Done! Info from sensors:{answer_from_ha}°C. Weather outside: 25°C.| (please say °C in your answer) | Shiro:"
+    query2 = f"[current time: {current_time}] Madrus: {query}. shiro: Retriving informations from her sensors... Done! Info from sensors:{answer_from_ha}°C. Weather outside: {outside_temp}°C.| (please say °C in your answer) | Shiro:"
     messages.append({"role": "user", "content": query2})
             
     print("messages: " + str(messages))
