@@ -32,7 +32,7 @@ from shared_code.home_assistant import ha_api_requests, open_weather_api
 conn = None
 tts_or_not = False
 show_history_variable = False
-name = "normal"
+name = "2462648762385fsfa246fasf24"
 agent_reply = ""
 agent_mode_variable = False
 
