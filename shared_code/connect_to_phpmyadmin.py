@@ -98,7 +98,7 @@ def check_user_in_database(name):
     else:
         # Create the hashed_key's table if it doesn't exist yet
         sql = f"""
-            CREATE TABLE {hashed_key} (
+            CREATE TABLE `{hashed_key}` (
                 id INT AUTO_INCREMENT PRIMARY KEY, 
                 role VARCHAR(50), 
                 content VARCHAR(4000), 
@@ -124,7 +124,7 @@ def check_user_in_database(name):
         for message in messages:
             role = message['role']
             content = message['content']
-            sql = f"INSERT INTO {name} (role, content) VALUES (%s, %s)"
+            sql = f"INSERT INTO `{hashed_key}` (role, content) VALUES (%s, %s)"
             cursor.execute(sql, (role, content))
 
         # Commit the changes to the hashed_key's table
