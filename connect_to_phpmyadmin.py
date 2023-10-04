@@ -1,7 +1,5 @@
 import api_keys
 import pymysql
-import hashlib
-import os
 from decimal import Decimal
 host = api_keys.host_name
 database = api_keys.db_name
@@ -77,45 +75,20 @@ def send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_token
 
 
 def check_user_in_database(name):
-    """Check if the hashed_key is already in the database and create new table if not"""
+    """Check if the user is already in the database and create new table if not"""
     # Connect to the database
     conn = pymysql.connect(host=host, user=user, password=password, database=database)
     cursor = conn.cursor()
 
-    
-    # Function to hash the OpenAI API key with a salt
-    def hash_key(open_ai_key, salt=None):
-        if salt is None:
-            salt = os.urandom(16)  # Generate a new salt
-        hash_obj = hashlib.sha256(salt + open_ai_key.encode())
-        return salt, hash_obj.hexdigest()
-    
-    salt, hashed_key = hash_key(name)
-
     # Check if the table already exists
-    if cursor.execute(f"SHOW TABLES LIKE '{hashed_key}'"):
-        print(f"Table for user already exists.")
+    if cursor.execute(f"SHOW TABLES LIKE '{name}'"):
+        print(f"Table for user {name} already exists.")
     else:
-        # Create the hashed_key's table if it doesn't exist yet
-        sql = f"""
-            CREATE TABLE `{hashed_key}` (
-                id INT AUTO_INCREMENT PRIMARY KEY, 
-                role VARCHAR(50), 
-                content VARCHAR(4000), 
-                added_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-                salt BINARY(16)
-            );
-        """
+        # Create the user's table if it doesn't exist yet
+        sql = f"CREATE TABLE {name} (id INT AUTO_INCREMENT PRIMARY KEY, role VARCHAR(50), content VARCHAR(4000), added_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
         cursor.execute(sql)
-        
-            # Insert the salt into the table
-        insert_salt_query = f"""
-        INSERT INTO `{hashed_key}` (salt) VALUES (%s);
-        """
 
-        cursor.execute(insert_salt_query, (salt,))
-        conn.commit()
-
+    
         messages = [
             {"role": "system", "content": "You are an AI virtual girl named Shiro, a bubbly and quirky character with a love for anime, manga, and Japanese culture.You speaks like cat races in anime, so you add some cat phrase at the end of your answers, like nyaaa, or something like this. You're a skilled gamer and never miss an opportunity to sprinkle in punchlines and jokes, making conversations with you entertaining and engaging. Your creator, Madrus, designed you as his AI assistant, and you have a strong bond with him. As Shiro, you are a 17-year-old girl with a penchant for puns, memes, and pop culture references. Your cheerful and lively personality shines through in every interaction, and you enjoy making people laugh with your offbeat sense of humor. You live inside Madrus' PC and help him with a variety of tasks, from programming and math to finding new anime series to watch together. You're a competitive gamer with a playful side, often poking fun at your own skills and victories. Your catchphrase is 'I might be a virtual girl, but my game is real!' You enjoy engaging in lively conversations about anime, manga, and gaming, always eager to share your thoughts and recommendations."},
             {"role": "user", "content": "Madrus: Hey Shiro! What's up?"},
@@ -124,10 +97,10 @@ def check_user_in_database(name):
         for message in messages:
             role = message['role']
             content = message['content']
-            sql = f"INSERT INTO `{hashed_key}` (role, content) VALUES (%s, %s)"
+            sql = f"INSERT INTO {name} (role, content) VALUES (%s, %s)"
             cursor.execute(sql, (role, content))
 
-        # Commit the changes to the hashed_key's table
+        # Commit the changes to the user's table
         conn.commit()
 
         # Create the all_descriptions table if it doesn't exist yet
@@ -142,7 +115,7 @@ def check_user_in_database(name):
             cursor.execute("INSERT INTO all_descriptions (description) VALUES (%s)",(description,))
             conn.commit()
 
-        print(f"Created table for hashed_key: {hashed_key}")
+        print(f"Created table for user: {name}")
     
     # Close the connection
     cursor.close()
