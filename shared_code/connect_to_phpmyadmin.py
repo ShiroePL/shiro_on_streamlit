@@ -97,7 +97,7 @@ def check_user_in_database(name):
         print(f"Table for user already exists.")
     else:
         # Create the hashed_key's table if it doesn't exist yet
-        sql = f"CREATE TABLE {hashed_key} (id INT AUTO_INCREMENT PRIMARY KEY, role VARCHAR(50), content VARCHAR(4000), added_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP), salt BINARY(16)"
+        sql = f"CREATE TABLE {hashed_key} (id INT AUTO_INCREMENT PRIMARY KEY, role VARCHAR(50), content VARCHAR(4000), added_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP), salt BINARY(16))"
         cursor.execute(sql)
         
             # Insert the salt into the table
