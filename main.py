@@ -13,7 +13,7 @@ from InstructorEmbedding import INSTRUCTOR
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from better_profanity import profanity
 import string
-from shared_code.langchain_database.langchain_vector_db_queries import search_db_with_llm_response
+from shared_code.langchain_database.langchain_vector_db_queries import search_db_with_llm_response, save_to_db, search_db_with_chroma_buildin_search
 from shared_code.calendar_functions.test_wszystkiego import add_event_from_shiro, retrieve_plans_for_days
 import base64
 import pandas as pd
@@ -38,6 +38,8 @@ show_history_variable = False
 name = "normal"
 agent_reply = ""
 agent_mode_variable = False
+search_vector_db_checkbox = False
+
 
 # Store the initial value of widgets in session state
 if "visibility" not in st.session_state:
@@ -98,27 +100,11 @@ def check_user_in_database(name):
 
 
 def show_answer_in_chat(answer, user_question = None):  # Added user_question as a parameter
-    # Initialize session state for storing messages if it doesn't exist
-    # if "messages" not in st.session_state:
-    #     st.session_state["messages"] = [
-    #         {"role": "assistant", "content": "Hi, I'm Shiro! Let's talk! :)"}
-    #     ]
-    
-    # Append user's question to the state
+   
     st.session_state.messages.append({"role": "user", "content": user_question})
     
-    # Append bot's answer to the state
     st.session_state.messages.append({"role": "assistant", "content": answer})
 
-    # # Display previous messages
-    # for message in st.session_state.messages:
-    #     with st.chat_message(message["role"]):
-    #         st.markdown(message["content"])
-
-    # # Display bot's answer
-    # with st.chat_message("assistant"):
-    #     st.markdown(answer)
-        
     
 def add_anilist_to_db(type):
     
@@ -130,29 +116,9 @@ def add_anilist_to_db(type):
     connect_to_phpmyadmin.add_pair_to_general_table(name, media_list) #to general table with all  questions and answers
 
 
-
-
 st.title("Shiro AI Chan")
 
-
-# Initialize session state for storing messages
-# if "messages" not in st.session_state:
-#     st.session_state["messages"] = [
-#         #{"role": "assistant", "content": "Hi, I'm Shiro! Let's talk! :)"}
-#     ]
-
 user_question = st.chat_input("I'm Shiro! Ask me anything!") # placeholder in " " ## chat input for asking question
-
-
-
-
-col11, col22 = st.columns(2)
-with col11:
-    progress_label = st.empty()
-    progress_label.text('Log...')
-
-
-    
 
 selected_language = st.sidebar.selectbox(
     'What language should i speak?',
@@ -160,21 +126,38 @@ selected_language = st.sidebar.selectbox(
 )
 
 with st.sidebar:
+    
+    
     my_bar = st.progress(0) #progress bar 
-    coll1, coll2 = st.columns(2)
+    coll1, coll2, col25 = st.columns(3)
+    print("___checkboxes status___")
     with coll1:
         voice_on_off = st.checkbox('Voice on/off')
         if voice_on_off:
             tts_or_not = True
             st.write('Great!!')
+            print("tts checkbox: ON")
+        else:
+            print("tts checkbox: OFF")
     with coll2:
         #pass
         agent_mode = st.checkbox('agent_mode on/off')
         if agent_mode:
             agent_mode_variable = True
-            st.write('Agent mode on!')                               
-    image = Image.open('pictures/avatar_shiro.png')
-    
+            st.write('Agent mode on!')
+            print("agent mode checkbox ON")
+        else:
+            print("agent mode checkbox OFF")    
+
+    with col25:
+        search_vector_db_checkbox = st.checkbox('search vector db')
+        if search_vector_db_checkbox:
+            search_vector_db_checkbox = True
+            st.write('Great!!')
+            print("search vector db checkbox ON")
+        else:
+            print("search vector db checkbox OFF")
+    print("___checkboxes status END___")
     
     col3, col4, col5 = st.columns(3)
 
@@ -195,59 +178,62 @@ with st.sidebar:
     with col7:
         show_room_temp_button = st.button('show room temp')
 
+    # with col8:
+    #     add_text_to_db = st.button('add text to vector db') # to do, not needed now
     with col8:
-        add_text_to_db = st.button('add text to vector db')
+        
+        introduction_button = st.button('What can you do?') ##############to change to introduciton of shiro
+
+    
+
+        # Create a file uploader widget
+    uploaded_file = st.file_uploader("Choose a PDF file you want to add to vector db", type=["pdf"])
+
+   
 
 
-    add_pdf_to_db = st.button('add text to vector dbs')
+
+    # Create a submit button
+    if st.button('Submit File to vector db'):
+        my_bar.progress(10, text="Saving file to disk...")
+        if uploaded_file is not None:
+            # Get the file's bytes
+            bytes_data = uploaded_file.read()
+            file_name = uploaded_file.name.replace(".pdf", "")
+            # Define the location to save the file
+            save_path = f"./shared_code/langchain_database/pdfs/{uploaded_file.name}"  # Replace 'your_file.pdf' with your preferred filename
+
+            # Save the file
+            with open(save_path, "wb") as f:
+                f.write(bytes_data)
+
+            st.success(f"File saved to {uploaded_file.name}")
+        else:
+            st.warning("No file uploaded")
+
+        my_bar.progress(50, text="Saving text to vector db...")
+        save_to_db("pdf", None, file_name)
+        my_bar.progress(100, text=f"Saved pdf {uploaded_file.name} to vector db!")
+        
+
+
+        # shiro avatar at the end of sidebar
+    image = Image.open('pictures/avatar_shiro.png') # doesnt work but i dont know why
     st.image(image)
 
 
 
-progress_label.text('checking...')
-
- # create table in there isnt and get history
-
-    # Get all punctuation but leave colon ':'
-# punctuation_without_colon = "".join([ch for ch in string.punctuation if ch != ":"])
-# user_question = user_question.translate(str.maketrans("", "", punctuation_without_colon)).strip().lower()
-
-
-# col1, col2, col3 = st.columns(3)
-
-# with col1:
-#     anime_button = st.button("show anime history")
-
-# with col2:
-#     manga_button = st.button("show manga history")
-
-# with col3:
-#     history_in_db_button = st.button("show history of chatting")
-
-# col4, col5, col6 = st.columns(3)
-
-# with col4:
-#     clean_history_button = st.button('clean history')
-
-# with col5:
-#     show_room_temp_button = st.button('show room temp')
-
-# with col6:
-#     add_text_to_db = st.button('add text to vector db')
-
-
-#add_pdf_to_db = st.button('add text to vector dbs')
-
-
 if anime_button:
+    my_bar.progress(30, text="getting data from anilist...")
     media_list,_ = anilist_api_requests.get_10_newest_entries("ANIME")
-    show_answer_in_chat(media_list)
+    show_answer_in_chat(media_list,"Can you show me my anime list?")
     add_anilist_to_db("anime")
     
 
 if manga_button:
+    my_bar.progress(30, text="getting data from anilist...")
     media_list,_ = anilist_api_requests.get_10_newest_entries("MANGA")
-    show_answer_in_chat(media_list)
+    show_answer_in_chat(media_list,"Can you show me my manga list?")
     add_anilist_to_db("manga")
     
 
@@ -300,14 +286,14 @@ if show_room_temp_button:
 if clean_history_button: 
     connect_to_phpmyadmin.reset_chat_history(name) # clean table
     connect_to_phpmyadmin.check_user_in_database(name) # make fresh table
-    progress_label.text('History cleaned!')
+    my_bar.progress(100, text="History cleaned!")
+    
     autoplay_beep("cute_beep.wav")
 
-if add_text_to_db:
-    pass
-    #to do
 
 
+
+ 
 
 def make_answer(user_question):
     database_messages =  check_user_in_database(name)
@@ -327,14 +313,15 @@ def make_answer(user_question):
     else:
         agent_reply = ""
         print("---------agent mode not entered---------")
-        my_bar.progress(10, text="agent not entered")
+        my_bar.progress(20, text="agent not entered")
 
     if user_question.lower().startswith("plan:") or "add_event_to_calendar" in agent_reply:
+        print("---------plan mode ENTERED---------")
         query = user_question.replace("plan:", "").strip()
 
         database_messages.append({"role": "user", "content": query})
             # use chain to add event to calendar
-        answer, prompt_tokens, completion_tokens, total_tokens, formatted_query_to_calendar = add_event_from_shiro(query)
+        answer, prompt_tokens, completion_tokens, total_tokens = add_event_from_shiro(query)
 
         my_bar.progress(60, text="event added")
         
@@ -342,10 +329,11 @@ def make_answer(user_question):
         connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
         connect_to_phpmyadmin.send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_tokens) #to A DB with usage stats
         
-        my_bar.progress(100, text="done")
+        my_bar.progress(100, text="Event added to calendar!")
         show_answer_in_chat(answer, user_question)
     
     elif user_question.lower().startswith("schedule:") or "retrieve_event_from_calendar" in agent_reply:
+        print("---------schedule mode ENTERED---------")
         query = user_question.replace("schedule:", "").strip()
         query = "Madrus: " + query
         database_messages.append({"role": "user", "content": query})
@@ -386,18 +374,21 @@ def make_answer(user_question):
         connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
         connect_to_phpmyadmin.send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_tokens) #to A DB with usage stats
         print("-----addded tokens to db--------")
-        
+        my_bar.progress(100, text="Here's your schedule!")
         
 
 
-    elif user_question.lower().startswith("db:") or "database_search" in agent_reply or "personal_db_search" in agent_reply:
+    elif user_question.lower().startswith("db:") or search_vector_db_checkbox == True:
+        print("---------vector db mode ENTERED---------")
         query = user_question.replace("db:", "").strip()
         database_messages.append({"role": "user", "content": query})
+
+        my_bar.progress(30, text="Searching db...")
         answer = search_db_with_llm_response(query)
-        
+        print("answer from db: " + str(answer))
         my_bar.progress(60, text="got answer")
 
-        show_answer_in_chat(answer, user_question)
+        show_answer_in_chat(answer, query)
 
         connect_to_phpmyadmin.insert_message_to_database(name, query, answer, database_messages) #insert to Azure DB to user table    
         connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
@@ -408,9 +399,11 @@ def make_answer(user_question):
                 request_voice_tts.request_voice_fn(answer)
             autoplay_question("response.wav") #play audio with answer
             autoplay_beep("cute_beep.wav") # end of answer beep
+        my_bar.progress(100, text="I think I found something!")
           
 
     elif user_question.lower().startswith("ha:") or "home_assistant" in agent_reply:
+        print("---------home assistant mode ENTERED---------")
         query = user_question.replace("ha:", "").strip()
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S %A")
         query = f"[current time: {current_time}] {query}"
@@ -444,8 +437,9 @@ def make_answer(user_question):
                 request_voice_tts.request_voice_fn(personalized_answer)
             autoplay_question("response.wav") #play audio with answer
             autoplay_beep("cute_beep.wav") # end of answer beep    
-        
-    #  elif "show_anime_list" in agent_reply or "show_manga_list" in agent_reply:
+
+        my_bar.progress(100, text="Here's temepreture of your room!")
+    # elif "show_anime_list" in agent_reply or "show_manga_list" in agent_reply:
             
     #     content_type = "anime" if "anime" in agent_reply else "manga" 
         
@@ -453,21 +447,24 @@ def make_answer(user_question):
             
     #     question = f"Madrus: I will give you list of my 10 most recent watched/read {content_type} from site AniList. Here is this list:{list_content}. I want you to remember this because in next question I will ask you to update episodes/chapters of one of them."
     #     #print("question from user:" + question)
-    #     messages.append({"role": "user", "content": question})
+    #     database_messages.append({"role": "user", "content": question})
 
     #     # send to open ai for answer !!!!!!!! I WONT SEND IT BECOUSE I ALREADY GOT IT FROM reformatting
     #     answer = "Okay, I will remember it, Madrus. I'm waiting for your next question. Give it to me nyaa."
     #     answer_to_app = f"Here is your list of most recent anime/manga.{list_content}" # this goes 
-
-    #     logging.info("requested list: \n" + answer_to_app)
-    #     print("requested list: \n" + answer_to_app)
-    #     logger.info("requested list: \n" + answer_to_app)
-    #     request_voice.request_voice_fn("Here is your list. *smile*") #request Azure TTS to for answer
-           
         
-    #     connect_to_phpmyadmin.insert_message_to_database(name, question, answer, messages) #insert to Azure DB to user table    
+    #     print("requested list: \n" + answer_to_app)
+        
+    #     if tts_or_not == True:
+    #         if selected_language == 'Polish':
+    #             request_voice_tts.request_voice_fn("Oto twoja lista", True) #request Azure TTS to for answer
+    #         else:
+    #             request_voice_tts.request_voice_fn("Here is your list. *smile*")
+    #         autoplay_question("response.wav") #play audio with answer
+    #         autoplay_beep("cute_beep.wav") # end of answer beep    
+    #     connect_to_phpmyadmin.insert_message_to_database(name, question, answer, database_messages) #insert to Azure DB to user table    
     #     print("------end of list function--------")
-    #     logging.info("-----end of list function------")
+        
     #     content_type_mode = content_type
         
     #     return answer_to_app
@@ -477,7 +474,6 @@ def make_answer(user_question):
     # elif checkbox_update: # she is in animelist mode, so she rebebmers list i gave her 
         
        
-        
     #     # make shiro find me id of anime/manga
           
     #     content_type = content_type_mode   
@@ -536,9 +532,10 @@ def make_answer(user_question):
     #     return answer_to_app
 
 
-
+    
 
     else:
+        print("---------normal mode ENTERED---------")
         question = f"Madrus: {user_question}"
         print("question from user:" + question)
         database_messages.append({"role": "user", "content": question})
@@ -556,7 +553,7 @@ def make_answer(user_question):
         
         if profanity.contains_profanity(answer) == True:
             answer = profanity.censor(answer)                    
-        my_bar.progress(60, text="saving to DB...")
+        my_bar.progress(60, text="saving to local db...")
         connect_to_phpmyadmin.insert_message_to_database(name, question, answer, database_messages) #insert to DB to user table    
         connect_to_phpmyadmin.add_pair_to_general_table(name, answer) #to general table with all  questions and answers
         connect_to_phpmyadmin.send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_tokens) #to A DB with usage stats
@@ -569,24 +566,13 @@ def make_answer(user_question):
             autoplay_question("response.wav") #play audio with answer
             autoplay_beep("cute_beep.wav") # end of answer beep   
         
-        print("---------------------------------")
+        
+        my_bar.progress(100, text="Answered!")
 
 
 # Capture and process user input
 if user_question:
-    
-    
-    
-
-    # Generate bot's answer (Replace this with real logic if needed)
-
-    #############################################################################################################
-                                            # HERE ANSWER FROM SHIRO 
     make_answer(user_question)
-
-    #############################################################################################################
-    
-    
 
 
 if "messages" not in st.session_state:
@@ -598,8 +584,6 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
- 
-progress_label.text('Done!')
 
-my_bar.progress(100, text="Done!")
+
 print("-------end of code---------")
