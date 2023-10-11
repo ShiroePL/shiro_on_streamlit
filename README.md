@@ -49,7 +49,7 @@ To use tools, you can just start question with 'agent mode' or 'agent:' or check
 * The 'shared_code' folder contains code that is common across all versions of ShiroAi-chan.
   * link to repository: https://github.com/ShiroePL/shiro_shared_code
 
-### 7. Screenshots 📸
+
 ## Screenshots
 #### Normal Talking Mode
 * Talk to her just like you would with anyone else!
