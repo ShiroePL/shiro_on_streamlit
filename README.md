@@ -115,6 +115,23 @@ Anime/Manga List 📋
   </tr>
 </table>
 
+* Update list.
+
+<table>
+  <tr>
+    <td>
+      <br>
+      <img src="pictures/update_list.png" width="500">
+    </td>
+    <td>
+      <img src="pictures/update_proof.png" width="450">
+      <br>
+      <strong>It worked, from Anilist site 😊</strong><br><br>
+      <img src="pictures/update_on_site.png" width="450">
+    </td>
+  </tr>
+</table>
+
 Room Temperature 🌡️
 * Check out the current temperature of your room.
 
