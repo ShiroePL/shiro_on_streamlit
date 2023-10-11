@@ -100,11 +100,18 @@ def check_user_in_database(name):
     return history
 
 
-def show_answer_in_chat(answer, user_question):  # Added user_question as a parameter
-    
+def show_answer_in_chat(answer, user_question):
     st.session_state.messages.append({"role": "user", "content": user_question})
     
-    st.session_state.messages.append({"role": "assistant", "content": answer})
+    if isinstance(answer, dict) and 'Summary' in answer and 'Description' in answer:
+        formatted_answer = f"**Summary:** {answer['Summary']}<br>" \
+                           f"**Description:** {answer['Description']}<br>" \
+                           f"**Date:** {answer['Date']}<br>" \
+                           f"**End Date:** {answer['End Date']}"
+        st.session_state.messages.append({"role": "assistant", "content": formatted_answer})
+    else:
+        st.session_state.messages.append({"role": "assistant", "content": answer})
+
 
 
 def add_anilist_to_db(type):
@@ -132,9 +139,31 @@ def format_as_table(data_str, type:str):
                 title = match.group(1)
                 id_str = match.group(2)
                 read_chapters = match.group(3)
-                table_data.append({"Title": title, "ID": id_str, "Read Chapters": read_chapters}) if type == "manga" else table_data.append({"Title": title, "ID": id_str, "Watched Episodes": read_chapters})
-                
+                #table_data.append({"Title": title, "ID": id_str, "Read Chapters": read_chapters}) if type == "manga" else table_data.append({"Title": title, "ID": id_str, "Watched Episodes": read_chapters})
+                if type == "manga":
+                    table_data.append({"Title": title, "ID": id_str, "Read Chapters": read_chapters})
+                else:
+                    table_data.append({"Title": title, "ID": id_str, "Watched Episodes": read_chapters})
+
     return table_data
+
+
+def parse_event_info(event_str):
+    pattern = r'summary: (.*?)\ndescription: (.*?)\ndate: (.*?)\nend_date: (.*)'
+    match = re.search(pattern, event_str)
+    if match:
+        summary = match.group(1)
+        description = match.group(2)
+        date = match.group(3)
+        end_date = match.group(4)
+        return {
+            "Summary": summary,
+            "Description": description,
+            "Date": date,
+            "End Date": end_date
+        }
+    else:
+        return None
 
 
 
@@ -255,7 +284,7 @@ if anime_button:
         # Create a DataFrame from the table data
     df = pd.DataFrame(table_data)
 
-    #show_answer_in_chat(df,"Can you show me my anime list?")
+    show_answer_in_chat(df,"Can you show me my anime list?")
     add_anilist_to_db("anime")
     my_bar.progress(100, text="Here's your list!")
     
@@ -356,7 +385,16 @@ def make_answer(user_question):
 
         database_messages.append({"role": "user", "content": query})
             # use chain to add event to calendar
-        answer, prompt_tokens, completion_tokens, total_tokens = add_event_from_shiro(query)
+        answer, prompt_tokens, completion_tokens, total_tokens, formatted_answer = add_event_from_shiro(query)
+
+        print("I added event with this info: \n" + formatted_answer)
+        
+        answer = "I added event to calendar with this information: \n" + formatted_answer
+        
+        
+        event_info = parse_event_info(formatted_answer)
+        print("event info: " + str(event_info))
+        show_answer_in_chat(event_info, user_question)
 
         my_bar.progress(60, text="event added")
         
@@ -365,8 +403,7 @@ def make_answer(user_question):
         connect_to_phpmyadmin.send_chatgpt_usage_to_database(prompt_tokens, completion_tokens, total_tokens) #to A DB with usage stats
         
         my_bar.progress(100, text="Event added to calendar!")
-        show_answer_in_chat(answer, user_question)
-    
+
     elif user_question.lower().startswith("schedule:") or "retrieve_event_from_calendar" in agent_reply:
         print("---------schedule mode ENTERED---------")
         query = user_question.replace("schedule:", "").strip()
@@ -615,7 +652,7 @@ if "messages" not in st.session_state:
             {"role": "assistant", "content": "Hi, I'm Shiro! Let's talk! :)"}
         ]
 
-#st.session_state.messages = [message for message in st.session_state.messages if message["content"] is not None]
+st.session_state.messages = [message for message in st.session_state.messages if message["content"] is not None]
 
 # Display previous messages
 for message in st.session_state.messages:
@@ -623,7 +660,7 @@ for message in st.session_state.messages:
         if isinstance(message["content"], pd.DataFrame):
             st.table(message["content"])
         else:
-            st.markdown(message["content"])
+            st.markdown(message["content"], unsafe_allow_html=True)
 
 
 print("-------end of code---------")
