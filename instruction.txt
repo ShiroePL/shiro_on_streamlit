@@ -1,1 +1,1 @@
-streamlit run test.py
+ To run write in terminal: streamlit run main.py
