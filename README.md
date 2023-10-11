@@ -1,54 +1,59 @@
-# 1. ShiroAi-chan comfy on Streamlit
+# 1. ShiroAi-chan Takes Over Streamlit 🌸
 
+### Introducing My Anime Waifu Assistant: ShiroAi-chan
+Harness the power of ChatGPT API to bring your very own AI-powered anime waifu to life! ShiroAi-chan is a customizable AI assistant designed to offer both written and vocal responses in an endearing manner.
 
+### Her Personality 💖
+ShiroAi-chan embodies the persona of a virtual cat-girl fond of anime, manga, light novels, and games. While her personality aligns with my interests, you can easily adapt her character to suit yours. Her dialogues are generated through prompts to the ChatGPT API, offering various 'personality modes' such as 'programmer god,' where she assists with coding queries.
 
-
-### My attempt to create my anime waifu assistant that can write and speak in cute voice.
-
-### Description:
-My personal Ai assistant ShiroAi-chan. I wanted to create AI girl for a long time and now with really cheap and powerful model like [ChatGPT API] it's possible for anyone.
-
-### Her personality
-* She is virtual cat-girl that likes anime, manga, light novels and games. (I wrote it for my preferences, but it can be changed easily). I am using tables as her 'personalities', for example, 'normal' is just her basic character description, but I can add personality like 'programmer god' in which she will be helping in programming problems. Personalities are just another role in prompt to [ChatGPT API].
-
-### ShiroAi-chan has 3 versions that depends of platform:
-* [Streamlit repo] - This is web verion of ShiroAi-chan, build with [Streamlit].
-* [Desktop repo] - This is desktop version of ShiroAi-chan, that is based on Tkinter as her GUI.
-* [Wearos repo] - This version is mobile version of ShiroAi-chan, most personal because I made it so I can use my WearOS watch to speak to her. This version uses [FastAPI] that is running in docker container.  
+### Platform-Specific Versions of ShiroAi-chan 🖥️📱⌚
+1. [Streamlit repo] - The web version, built using [Streamlit].
+2. [Desktop repo] - The desktop version featuring a Tkinter-based GUI.
+3. [Wearos repo] - The mobile version, optimized for WearOS watches. This version runs on [FastAPI] inside a Docker container. (This version is most personalized, as I was focused on my Galaxy Watch 4)
 
 ### GUI
 ![Screenshot](pictures/gui.png)
 
-## What she can do?
-### 1. Writing
-* She uses [ChatGPT API] to generate responses as AI cat girl.
+### Features 🌟
+### 1. Writing ✍️
+* ShiroAi-chan utilizes the [ChatGPT API] to respond as an adorable AI cat-girl.
 
 
-### 2. Her memory :heart_eyes:
-* She uses MariaDB to store her memories. She can remember up to 4 last questions, more is more expensive.(can be changed)
-* She uses Chroma Vector Database to store pdf's and then you can 'Ask my pdf'. It uses Huggingface Embeddings so it is free. GPU for adding to database, and then CPU for embedding questions.
+### 2. Her Memory 😍
+* MariaDB stores her memories. She remembers the last 4 questions (configurable for more).
+* She can also "read" PDFs stored in a Chroma Vector Database, using Huggingface Embeddings.
 * Every 'persona' setting has its own table in database and can reset it with button.
   
-### 3. Voice :microphone:
-*  Using Microsoft [Azure TTS], she can speak in cute voice. English(kinda cute) or Polish(not so cute).
+### 3. Voice 🎤
+*  Leveraging Microsoft Azure TTS, she can speak in both English and Polish. English is cuter.
 
-### 4. Communication with her :speech_balloon:
+### 4. Communication 🗨️
 
-* Just write in input and sent it to her or if you're on mobile, use device build-in TTS.
+* Type your query into the input field or use built-in TTS on mobile devices.
 
-### 5. AI functions:
-* She uses langchain Agent to choose what Tool use.
-  * Tools for now are: 
-    * show last 10 anime/manga list from Anilist for user. (also there are buttons for it)
-    * search vector database. You can add full pdf books, or other documents, and ask questions to this documents, and she will take relevant parts from documents, and answer questions analyzing that parts.
-    * she can use calendar. Add events based on what info you give her(in normal human sentence!) and retrieve information about events for specified days. (accuracy is like 85%, it's hard to have 100% if event is detailed)
-    * using home assistant API she can tell temperature from sensor, sometimes making funny comments about difference with temperature outside (from weather API). It's more my personal function, because you need to change code of home assistant API and have sensor in the first place.
-  * to use tools, you can just start question with 'agent mode' or 'agent:' or check agent mode check.
+### 5. AI Features 🤖
+  She employs a Langchain Agent to choose tools, which include:
 
-### 6. Folder 'shared_code'
-* This folder contain code that is shared between all version of ShiroAI-chan.
-  * link to repository: https://github.com/ShiroePL/shiro_shared_code
+  * Retrieving the last 10 anime/manga list entries from Anilist. (also there are buttons for it)
+  * Vector database searches for document-based queries. You can add full pdf books, or other documents, and ask questions to this documents then she will take relevant parts from documents, and answer questions analyzing that parts.
+  * Calendar functions to add and retrieve events. Add events based on what information you give her (in normal human sentence!) and retrieve information about events for specified days. (accuracy is like 85%, it's hard to have 100% if event is too detailed)
+  * Weather and home sensor data, along with quirky commentary. It's more my personal function,   because you need to change code of home assistant API and have sensor in the first place.
   
+To use tools, you can just start question with 'agent mode' or 'agent:' or check agent mode check.
+
+### 6. Shared Code 🔄
+* The 'shared_code' folder contains code that is common across all versions of ShiroAi-chan.
+  * link to repository: https://github.com/ShiroePL/shiro_shared_code
+
+
+### 7. Configuration and Installation 🛠️
+
+You need to configure 2 files with passwords and API keys: 
+
+
+
+
+
 ## Links 
 
 [ChatGPT API] : https://openai.com/blog/introducing-chatgpt-and-whisper-apis
