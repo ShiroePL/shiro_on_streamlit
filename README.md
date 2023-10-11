@@ -14,13 +14,11 @@ ShiroAi-chan embodies the persona of a virtual cat-girl fond of anime, manga, li
 ### GUI
 ![Screenshot](pictures/gui.png)
 
-- [Chapter 1: Features](#Features)
-- [Chapter 2: Screenshots](#Screenshots)
-- [Chapter 3: Configuration](#Configuration)
+- [Features](#Features)
+- [Screenshots](#Screenshots)
+- [Configuration](#Configuration)
 
 
-
-## Features 🌟
 ## Features
 ### 1. Writing ✍️
 * ShiroAi-chan utilizes the [ChatGPT API] to respond as an adorable AI cat-girl.
@@ -126,9 +124,9 @@ Room Temperature 🌡️
 
 
 
-
-### 8. Configuration and Installation 🛠️
 ## Configuration
+### 8. Configuration and Installation 🛠️
+
 
 
 1. You need to configure api_keys.py file inside 'shared_code' folder: 
