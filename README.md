@@ -14,10 +14,9 @@ ShiroAi-chan embodies the persona of a virtual cat-girl fond of anime, manga, li
 ### GUI
 ![Screenshot](pictures/gui.png)
 
-### Features 🌟
+## Features 🌟
 ### 1. Writing ✍️
 * ShiroAi-chan utilizes the [ChatGPT API] to respond as an adorable AI cat-girl.
-
 
 ### 2. Her Memory 😍
 * MariaDB stores her memories. She remembers the last 4 questions (configurable for more).
@@ -34,10 +33,10 @@ ShiroAi-chan embodies the persona of a virtual cat-girl fond of anime, manga, li
 ### 5. AI Features 🤖
   She employs a Langchain Agent to choose tools, which include:
 
-  * Retrieving the last 10 anime/manga list entries from Anilist. (also there are buttons for it)
+  * Retrieving the last 10 anime/manga list entries from Anilist. (ask about it with agent mode checkbox ON or press button)
   * Vector database searches for document-based queries. You can add full pdf books, or other documents, and ask questions to this documents then she will take relevant parts from documents, and answer questions analyzing that parts.
-  * Calendar functions to add and retrieve events. Add events based on what information you give her (in normal human sentence!) and retrieve information about events for specified days. (accuracy is like 85%, it's hard to have 100% if event is too detailed)
-  * Weather and home sensor data, along with quirky commentary. It's more my personal function,   because you need to change code of home assistant API and have sensor in the first place.
+  * Calendar functions to add and retrieve events. Add events based on what information you give her (in normal human sentence!) and retrieve information about events for specified days. (accuracy is like 85%, it's hard to have 100% if event is too detailed) This function is using Caldav, I am using nextcloud API for it.
+  * Weather and home sensor data, along with quirky commentary. It's more my personal function, because you need to change code of home assistant API and have sensor in the first place.
   
 To use tools, you can just start question with 'agent mode' or 'agent:' or check agent mode check.
 
@@ -45,8 +44,73 @@ To use tools, you can just start question with 'agent mode' or 'agent:' or check
 * The 'shared_code' folder contains code that is common across all versions of ShiroAi-chan.
   * link to repository: https://github.com/ShiroePL/shiro_shared_code
 
+### 7. Screenshots 📸
 
-### 7. Configuration and Installation 🛠️
+#### Normal Talking Mode
+* Talk to her just like you would with anyone else!
+
+<img src="pictures/shiro_introduces_herself.png" width="500">
+
+Calendar Functions 🗓️
+<table>
+  <tr>
+    <td>
+      <strong>Adding a New Event:</strong><br>
+      <img src="pictures/added_plan.png" width="450">
+    </td>
+    <td>
+      <strong>Retrieving Plans for a Specified Day:</strong><br>
+      <img src="pictures/retriving_plans.png" width="450">
+    </td>
+  </tr>
+</table>
+
+
+Vector Database Functions 📚
+<table>
+  <tr>
+    <td>
+      <strong>Saving PDFs to Vector Database:</strong><br>
+      <img src="pictures/saved_pdf.png" width="450">
+    </td>
+    <td>
+      <strong>PDF Fragment:</strong><br>
+      <img src="pictures/pdf_fragment.png" width="600">
+      <strong>Asking Questions Based on PDF Content:</strong><br>
+      <img src="pictures/vector_db_answer.png" width="600">
+    </td>
+  </tr>
+</table>
+
+
+
+Anime/Manga List 📋
+* See your latest watched/read anime/manga.
+
+<table>
+  <tr>
+    <td>
+      <br>
+      <img src="pictures/anime_list.png" width="450">
+    </td>
+    <td>
+      <br>
+      <img src="pictures/manga_list.png" width="450">
+    </td>
+  </tr>
+</table>
+
+Room Temperature 🌡️
+* Check out the current temperature of your room.
+
+<img src="pictures/temperature_example.png" width="500">
+
+
+
+
+
+
+### 8. Configuration and Installation 🛠️
 
 You need to configure 2 files with passwords and API keys: 
 
