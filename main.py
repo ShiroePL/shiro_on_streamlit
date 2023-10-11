@@ -31,6 +31,7 @@ from langchain.agents import initialize_agent, AgentType
 from langchain.callbacks import StreamlitCallbackHandler
 from langchain.tools import DuckDuckGoSearchRun
 from st_chat_message import message
+import re
 
 conn = None
 tts_or_not = False
@@ -99,13 +100,13 @@ def check_user_in_database(name):
     return history
 
 
-def show_answer_in_chat(answer, user_question = None):  # Added user_question as a parameter
-   
+def show_answer_in_chat(answer, user_question):  # Added user_question as a parameter
+    
     st.session_state.messages.append({"role": "user", "content": user_question})
     
     st.session_state.messages.append({"role": "assistant", "content": answer})
 
-    
+
 def add_anilist_to_db(type):
     
     media_list,_ = anilist_api_requests.get_10_newest_entries("ANIME")
@@ -114,6 +115,29 @@ def add_anilist_to_db(type):
 
     connect_to_phpmyadmin.insert_message_to_database(name, query, media_list, database_messages) #insert to Azure DB to user table    
     connect_to_phpmyadmin.add_pair_to_general_table(name, media_list) #to general table with all  questions and answers
+
+# for anime and manga list
+def format_as_table(data_str, type:str):
+    """Format the data as a table with 3 columns.
+
+    type is anime or manga"""
+    entries = data_str.split('\n')
+    table_data = []
+    pattern = r'^romaji_title:(.*), id:(\d+), read_chapters:(.*)$' if type == "manga" else r'^romaji_title:(.*), id:(\d+), watched_episodes:(.*)$'
+    
+    for entry in entries:
+        if entry.strip():  # Exclude empty strings
+            match = re.search(pattern, entry.strip())
+            if match:
+                title = match.group(1)
+                id_str = match.group(2)
+                read_chapters = match.group(3)
+                table_data.append({"Title": title, "ID": id_str, "Read Chapters": read_chapters}) if type == "manga" else table_data.append({"Title": title, "ID": id_str, "Watched Episodes": read_chapters})
+                
+    return table_data
+
+
+
 
 
 st.title("Shiro AI Chan")
@@ -226,16 +250,27 @@ with st.sidebar:
 if anime_button:
     my_bar.progress(30, text="getting data from anilist...")
     media_list,_ = anilist_api_requests.get_10_newest_entries("ANIME")
-    show_answer_in_chat(media_list,"Can you show me my anime list?")
+    table_data = format_as_table(media_list, "anime")
+
+        # Create a DataFrame from the table data
+    df = pd.DataFrame(table_data)
+
+    #show_answer_in_chat(df,"Can you show me my anime list?")
     add_anilist_to_db("anime")
+    my_bar.progress(100, text="Here's your list!")
     
 
 if manga_button:
     my_bar.progress(30, text="getting data from anilist...")
     media_list,_ = anilist_api_requests.get_10_newest_entries("MANGA")
-    show_answer_in_chat(media_list,"Can you show me my manga list?")
+    table_data = format_as_table(media_list, "manga")
+
+    # Create a DataFrame from the table data
+    df = pd.DataFrame(table_data)
+   
+    show_answer_in_chat(df, "Can you show me my manga list?")
     add_anilist_to_db("manga")
-    
+    my_bar.progress(100, text="Here's your list!")
 
 if history_in_db_button:
     history = check_user_in_database(name)
@@ -265,7 +300,7 @@ if show_room_temp_button:
     my_bar.progress(60, text="got answer")
     
     ###############################################################################
-    show_answer_in_chat(personalized_answer)
+    show_answer_in_chat(personalized_answer, "What temperature is in my room?")
 
 
 
@@ -579,11 +614,16 @@ if "messages" not in st.session_state:
         st.session_state["messages"] = [
             {"role": "assistant", "content": "Hi, I'm Shiro! Let's talk! :)"}
         ]
+
+#st.session_state.messages = [message for message in st.session_state.messages if message["content"] is not None]
+
 # Display previous messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
+        if isinstance(message["content"], pd.DataFrame):
+            st.table(message["content"])
+        else:
+            st.markdown(message["content"])
 
 
 print("-------end of code---------")
