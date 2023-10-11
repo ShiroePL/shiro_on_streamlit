@@ -49,8 +49,18 @@ To use tools, you can just start question with 'agent mode' or 'agent:' or check
 #### Normal Talking Mode
 * Talk to her just like you would with anyone else!
 
-<img src="pictures/shiro_introduces_herself.png" width="500">
-
+<table>
+  <tr>
+    <td>
+      <br>
+      <img src="pictures/shiro_introduces_herself.png" width="500">
+    </td>
+    <td>
+      <br>
+      <img src="pictures/normal_talk.png" width="500">
+    </td>
+  </tr>
+</table>
 Calendar Functions 🗓️
 <table>
   <tr>
