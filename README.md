@@ -35,10 +35,11 @@ ShiroAi-chan embodies the persona of a virtual cat-girl fond of anime, manga, li
 
 * Type your query into the input field or use built-in TTS on mobile devices.
 
-### 5. AI Features 🤖
+### 5. AI Features 🤖 ( examples in screenshots)
   She employs a Langchain Agent to choose tools, which include:
 
   * Retrieving the last 10 anime/manga list entries from Anilist. (ask about it with agent mode checkbox ON or press button)
+  * Updating anime/manga on last 10 anime/manga list, using human-like sentences. 
   * Vector database searches for document-based queries. You can add full pdf books, or other documents, and ask questions to this documents then she will take relevant parts from documents, and answer questions analyzing that parts.
   * Calendar functions to add and retrieve events. Add events based on what information you give her (in normal human sentence!) and retrieve information about events for specified days. (accuracy is like 85%, it's hard to have 100% if event is too detailed) This function is using Caldav, I am using nextcloud API for it.
   * Weather and home sensor data, along with quirky commentary. It's more my personal function, because you need to change code of home assistant API and have sensor in the first place.
@@ -146,7 +147,7 @@ Room Temperature 🌡️
 
 
 
-1. You need to configure api_keys.py file inside 'shared_code' folder: 
+1. You need to add and configure api_keys.py file inside 'shared_code' folder: 
 
 ```python
 # These are mandatory for connecting to MariaDB
@@ -165,7 +166,7 @@ calendar_username = ""  # CalDAV username
 calendar_password = ""  # CalDAV password
 nextcloud_url = ""  # Nextcloud URL for DAV functions, e.g., https://example.com/remote.php/dav
 
-# This is not used in code, but you'll need to manually generate this token by running the 'anilist_api_get_token.py' file in the shared_code/anilist folder if you want to use anime/manga list functions
+# You'll need to manually generate this token by running the 'anilist_api_get_token.py' file in the shared_code/anilist folder if you want to use anime/manga list functions
 anilist_access_token = ""
 
 # Required for using the anime/manga list function; obtain these from the AniList site
@@ -176,7 +177,13 @@ client_secret = ""
 path_to_langchain = ""
 ```
 
-2. To configure the device type for PyTorch in the ``shared_code\langchain_database\langchain_vector_db_queries.py`` file, you'll need to modify the device argument in the HuggingFaceInstructEmbeddings function. Here are the steps:
+2. To make sure the application functions properly, you need to add certain API keys to your system's environment variables:
+  *  OpenAI API Key:
+     *  Add your OpenAI API key to the environment variables and name it ```OPENAI_API_KEY```
+  *  Azure Cognitive Speech 
+     *  If you intend to use Text-to-Speech (TTS) functionalities, add ```SPEECH_REGION``` and ```SPEECH_KEY``` to the environment variables. Instructions: https://learn.microsoft.com/en-us/azure/ai-services/multi-service-resource?pivots=azportal&tabs=windows#get-the-keys-for-your-resource
+
+3. To configure the device type for PyTorch in the ``shared_code\langchain_database\langchain_vector_db_queries.py`` file, you'll need to modify the device argument in the HuggingFaceInstructEmbeddings function. Here are the steps:
 
      * Open the file ``shared_code\langchain_database\langchain_vector_db_queries.py``.
 
@@ -194,7 +201,7 @@ path_to_langchain = ""
         * If you have an Nvidia GPU and have installed the CUDA version of PyTorch, you can leave the device value as ``"cuda"``.
         * If you don't have a GPU, or haven't installed the CUDA version of PyTorch, change the device value to ``"cpu"``.
      
-3. Installing Dependencies on Windows
+4. Installing Dependencies on Windows
    ```bash
    pip install -r requirements.txt
    ```
@@ -204,7 +211,7 @@ path_to_langchain = ""
     * If you're using a different Python version, you may need to modify the requirements.txt file to ensure package compatibility.
     * Specifically, Python 3.10.0 may require different package versions, so you might have to install them manually if the provided requirements.txt file doesn't work for you.
   
-4. #### Running the Program
+5. #### Running the Program
    * To launch the application locally, execute the following command in your terminal:
     ```bash
     streamlit run main.py
