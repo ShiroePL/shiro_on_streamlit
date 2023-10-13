@@ -1,4 +1,4 @@
-# 1. ShiroAi-chan Takes Over Streamlit 🌸
+# ShiroAi-chan Takes Over Streamlit 🌸
 
 ### Introducing My Anime Waifu Assistant: ShiroAi-chan
 Harness the power of ChatGPT API to bring your very own AI-powered anime waifu to life! ShiroAi-chan is a customizable AI assistant designed to offer both written and vocal responses in an endearing manner.
