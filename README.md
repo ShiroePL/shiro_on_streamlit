@@ -241,5 +241,5 @@ path_to_langchain = ""
 [Azure TTS]: https://azure.microsoft.com/en-us/products/cognitive-services/text-to-speech/
 [Streamlit]: https://streamlit.io/
 [Streamlit repo]: https://github.com/ShiroePL/shiro_on_streamlit
-[Desktop repo]: https://github.com/ShiroePL/shiro_chan_desktop
+[Desktop repo]: https://github.com/ShiroePL/ShiroAiChan-on-Windows
 [Wearos repo]: https://github.com/ShiroePL/Shiro-AI-Chan-in-container
