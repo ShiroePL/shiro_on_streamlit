@@ -173,7 +173,7 @@ anilist_access_token = ""
 client_id = ""
 client_secret = ""
 
-# Path to the Langchain folder, e.g., 'C:\\example\\folder\\shiro_on_streamlit\\shared_code\\langchain_database\\'
+# Path to the Langchain folder, e.g., 'C:\\example\\folder\\ShiroAiChan-on-Streamlit\\shared_code\\langchain_database\\'
 path_to_langchain = ""
 ```
 
