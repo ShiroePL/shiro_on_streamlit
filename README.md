@@ -211,7 +211,12 @@ path_to_langchain = ""
     * If you're using a different Python version, you may need to modify the requirements.txt file to ensure package compatibility.
     * Specifically, Python 3.10.0 may require different package versions, so you might have to install them manually if the provided requirements.txt file doesn't work for you.
   
-5. #### Running the Program
+5. MariaDB
+   
+    * If you don't have MariaDB installed, you can use [XAMPP] as an easy way to get started with MariaDB. Download and install [XAMPP] from their official website and activate the MariaDB service through the [XAMPP] control panel, then make database. 
+
+
+6. #### Running the Program
    * To launch the application locally, execute the following command in your terminal:
     ```bash
     streamlit run main.py
@@ -237,9 +242,12 @@ path_to_langchain = ""
 
 [Wearos repo] : https://github.com/ShiroePL/Shiro-AI-Chan-in-container
 
+[XAMPP] : https://www.apachefriends.org/pl/index.html
+
 [ChatGPT API]: https://openai.com/blog/introducing-chatgpt-and-whisper-apis
 [Azure TTS]: https://azure.microsoft.com/en-us/products/cognitive-services/text-to-speech/
 [Streamlit]: https://streamlit.io/
 [Streamlit repo]: https://github.com/ShiroePL/shiro_on_streamlit
 [Desktop repo]: https://github.com/ShiroePL/ShiroAiChan-on-Windows
 [Wearos repo]: https://github.com/ShiroePL/Shiro-AI-Chan-in-container
+[XAMPP]: https://www.apachefriends.org/pl/index.html
