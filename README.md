@@ -51,6 +51,10 @@ To use tools, you can just start question with 'agent mode' or 'agent:' or check
   * link to repository: https://github.com/ShiroePL/shiro_shared_code
 
 
+
+### Work in Progress 🛠️
+* I am in the process of adding a feature that enables ShiroAi-chan to interact with a locally-hosted language model. The model is managed by a specialized [Web UI](https://github.com/oobabooga/text-generation-webui) that offers a real-time API interface. This API is designed for text-streaming and processes user requests via the Web UI, which then communicates directly with the model to generate responses. Conversational history will be saved in a local JSON file for a more personalized experience.
+
 ## Screenshots
 #### Normal Talking Mode
 * Talk to her just like you would with anyone else!
@@ -260,6 +264,8 @@ path_to_langchain = ""
 
 [Wearos repo] : https://github.com/ShiroePL/Shiro-AI-Chan-in-container
 
+[text-generation WebUI] : https://github.com/oobabooga/text-generation-webui
+
 [XAMPP] : https://www.apachefriends.org/pl/index.html
 
 [ChatGPT API]: https://openai.com/blog/introducing-chatgpt-and-whisper-apis
@@ -269,3 +275,4 @@ path_to_langchain = ""
 [Desktop repo]: https://github.com/ShiroePL/ShiroAiChan-on-Windows
 [Wearos repo]: https://github.com/ShiroePL/Shiro-AI-Chan-in-container
 [XAMPP]: https://www.apachefriends.org/pl/index.html
+[text-generation WebUI]:https://github.com/oobabooga/text-generation-webui
