@@ -29,6 +29,8 @@ if "visibility" not in st.session_state:
     st.session_state.visibility = "visible"
     st.session_state.disabled = False
 
+
+
 def agent_shiro(query):
     agent = CustomToolsAgent()
     final_answer = agent.run(query)
@@ -143,19 +145,100 @@ def parse_event_info(event_str):
         }
     else:
         return None
+#####-----------------------------------------ADULT SHIRO STARTS HERE-----------------------------------------#####
+import asyncio
+import json
+from test_local_model.api_chat_stream import run
+
+def fetch_history_from_json():
+    try:
+        with open('test_local_model/chat_history.json', 'r') as f:
+            history = json.load(f)
+            # Check if the file is empty
+            if not history:
+                return {'internal': [], 'visible': []}
+            return history
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {'internal': [], 'visible': []}
 
 
-st.title("Shiro AI Chan 😊")
+def update_history_to_json(history):
+    with open('test_local_model/chat_history.json', 'w') as f:
+        json.dump(history, f)
 
-user_question = st.chat_input("I'm Shiro! Ask me anything!") # placeholder in " " ## chat input for asking question
 
-selected_language = st.sidebar.selectbox(
-    'What language should i speak?',
-    ('English', 'Polish')
-)
+
+def adult_shiro(user_question):
+    # Initialize state
+    if "custom_model_history" not in st.session_state:
+        st.session_state.custom_model_history = fetch_history_from_json()
+
+    # Initialize or restore messages based on the history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+        for i, (user_msg, assistant_msg) in enumerate(st.session_state.custom_model_history['internal']):
+            if user_msg:
+                st.session_state.messages.append({"role": "user", "content": user_msg})
+            if assistant_msg:
+                st.session_state.messages.append({"role": "assistant", "content": assistant_msg})
+
+    # Display previous messages
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+
+    # Get new input
+    if user_question:
+        st.session_state.messages.append({"role": "user", "content": user_question})
+        with st.chat_message("user"):
+            st.markdown(user_question)
+
+        # Append to history
+        arr = [user_question, '']
+        st.session_state.custom_model_history['internal'].append(arr.copy())
+        st.session_state.custom_model_history['visible'].append(arr.copy())
+
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            async def stream_response():
+                assistant_response = ""
+                cur_len = 0
+                async for new_history in run(user_question, st.session_state.custom_model_history):
+                    cur_message = new_history['visible'][-1][1][cur_len:]
+                    cur_len += len(cur_message)
+                    assistant_response += cur_message
+                    message_placeholder.markdown(assistant_response + "▌")
+
+                return assistant_response
+
+            full_response = loop.run_until_complete(stream_response())
+
+            # Update the history
+            st.session_state.custom_model_history['internal'][-1][1] = full_response
+            st.session_state.custom_model_history['visible'][-1][1] = full_response
+
+            # Update the JSON file
+            update_history_to_json(st.session_state.custom_model_history)
+
+            message_placeholder.markdown(full_response)
+
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+
+# ----------------------------END OF ADULT SHIRO----------------------------------------------
+
+
 
 with st.sidebar:
-    
+    selected_language = st.sidebar.selectbox(
+    'What language should i speak?',
+    ('English', 'Polish')
+    )
     my_bar = st.progress(0) #progress bar 
     coll1, coll2 = st.columns(2)
     print("___checkboxes status___")
@@ -174,7 +257,7 @@ with st.sidebar:
         else:
             print("agent mode checkbox OFF")    
 
-    col25, col26 = st.columns(2)
+    col25, col26, col27 = st.columns(3)
 
     with col25:
         search_vector_db_checkbox = st.checkbox('search vector db')
@@ -183,6 +266,7 @@ with st.sidebar:
             print("search vector db checkbox ON")
         else:
             print("search vector db checkbox OFF")
+
     with col26:
         update_anime_or_manga_list = st.checkbox('update manga/anime')
         if update_anime_or_manga_list:
@@ -190,6 +274,15 @@ with st.sidebar:
             print("update manga/anime ON")
         else:
             print("update manga/anime OFF")
+
+    with col27:
+        adult_shiro_checkbox = st.checkbox('Adult ShiroAI-Chan')
+        if adult_shiro_checkbox:
+            adult_shiro_checkbox = True
+            print("adult_shiro_checkbox ON")
+        else:
+            print("adult_shiro_checkbox OFF")
+
 
     print("___checkboxes status END___")
     
@@ -619,26 +712,35 @@ def make_answer(user_question):
         
         my_bar.progress(100, text="Here's my answer!")
 
+st.title("Shiro AI Chan 😊")
+
+user_question = st.chat_input("I'm Shiro! Ask me anything!") # placeholder in " " ## chat input for asking question
+
+
+
+# Initialize state
+if "custom_model_history" not in st.session_state:
+    st.session_state.custom_model_history = fetch_history_from_json()
+
+
+
 
 # Capture and process user input
 if user_question:
-    make_answer(user_question)
+    if adult_shiro_checkbox == True:
+        adult_shiro(user_question)
+    else:
+        make_answer(user_question)
+
 
 
 if "messages" not in st.session_state:
         st.session_state["messages"] = [
             {"role": "assistant", "content": "Hi, I'm Shiro! Let's talk! :)"}
         ]
+if adult_shiro_checkbox == False:
+    st.session_state.messages = [message for message in st.session_state.messages if message["content"] is not None]
 
-st.session_state.messages = [message for message in st.session_state.messages if message["content"] is not None]
-
-# Display previous messages
-# for message in st.session_state.messages:
-#     with st.chat_message(message["role"]):
-#         if isinstance(message["content"], pd.DataFrame):
-#             st.table(message["content"])
-#         else:
-#             st.markdown(message["content"], unsafe_allow_html=True)
 
 for message in st.session_state.messages:
     avatar_image = "pictures/avatar_shiro.png" if message["role"] == "assistant" else None
