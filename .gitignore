@@ -17,6 +17,7 @@
 *password*
 *.httr-oauth*
 shared_code/api_keys.py
+test_local_model
 #api klucze
 **/api_keys.py
 **/private_variables.py
@@ -40,7 +41,7 @@ sonar-project.properties
 misaki.pdf
 langchain_database/db_na_large_viola1
 langchain_database/mydata
-
+streamli_file_moj.py
 # Mac/OSX
 .DS_Store
 
