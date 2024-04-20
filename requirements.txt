@@ -41,7 +41,7 @@ InstructorEmbedding==1.0.0
 Jinja2==3.1.2
 joblib==1.2.0
 jsonschema==4.17.3
-langchain==0.0.268
+langchain==0.1.0
 langcodes==3.3.0
 langsmith==0.0.24
 lxml==4.9.3
